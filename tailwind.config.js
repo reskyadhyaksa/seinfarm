@@ -7,11 +7,26 @@ module.exports = {
   ],
   theme: {
     extend: {
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic':
-          'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+      screens: {
+        '3xl': '1660px'
       },
+      
+      animation: {
+        fade: 'fadeout .5s ease-in-out',
+        in: 'translateIn .5s ease-in-out',
+      },
+      keyframes: theme => ({
+        fadeout: {
+          '0%': {opacity: .0},
+          '50%': {opacity: .5},
+          '100%': {opacity: 1},
+        },
+
+        translateIn: {
+          '0%': { width : 'fit', transform: 'translateY(-100%)'},
+          '100%': { width : 'fit', transform: 'translateY(0%)'},
+        }
+      })
     },
   },
   plugins: [],
