@@ -12,7 +12,11 @@ export default function Admin1() {
         await getDocs(collection(db, "seinfarm"))
             .then((querySnapshot)=>{               
                 const newData = querySnapshot.docs
-                    .map((doc) => ({...doc.data(), id:doc.id }));
+                    .map((doc) => ({...doc.data(), id:doc.id })).sort((a, b) =>{
+                        const dateA = new Date(a.tanggal.split('/').reverse().join('/'));
+                        const dateB = new Date(b.tanggal.split('/').reverse().join('/'));
+                        return dateA - dateB;
+                    });
                 setData(newData);                
                 // console.log(todos, newData);
             })
@@ -41,8 +45,8 @@ export default function Admin1() {
     const getTotal =  () => {
         const temp_array = [];
         const monthNames = [
-            'jan', 'feb', 'mar', 'apr', 'may', 'jun',
-            'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+            'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+            'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
         ];
 
         const monthTotals = Array(12).fill(0);

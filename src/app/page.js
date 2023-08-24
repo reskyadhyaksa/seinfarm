@@ -2,14 +2,19 @@
 'use client'
 
 import CustomFooter from '@/components/footer';
+import Head from 'next/head';
 import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [ index, setIndex ] = useState(0);
 
+  useEffect(() =>{
+    document.title = " SEINFARM"
+  }, [])
+
   return (
     <>
-      <main className="flex flex-col md:gap-4 place-items-center md:h-full h-fit  justify-center animate-fade pt-4 ">
+      <main className="flex flex-col md:gap-4 place-items-center justify-center animate-fade pt-4 ">
         <section className='md:hidden flex'>
           <button onClick={() => setIndex(!index)} className='absolute left-3 translate-y-20 bg-white h-10 w-10 text-xl font-bold rounded-full'>{'<'}</button>
           <button onClick={() => setIndex(!index)} className='absolute right-3 translate-y-20 bg-white h-10 w-10 text-xl font-bold rounded-full'>{'>'}</button>

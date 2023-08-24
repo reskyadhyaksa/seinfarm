@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function LoginPage() {
     const [ index, setIndex ] = useState(false);
@@ -36,6 +36,10 @@ export default function LoginPage() {
         // setLogin('/admin')
     }
 
+    useEffect(() =>{
+        document.title = " SEINFARM - Login"
+    })
+
     return(
         <main className="animate-fade flex items-center justify-center mt-20 md:mt-24">
             { index == false ? 
@@ -47,7 +51,7 @@ export default function LoginPage() {
             : 
             <div className="w-auto animate-fade">
                 <button onClick={() => window.location.reload(false)}><img src="/arrow.png" height={0} width={0} sizes='30px' alt='' className="translate-x-6 translate-y-[28px] absolute w-7"/></button>
-                <div className="bg-white h-fit px-10 py-5 flex flex-col items-center">
+                <div className="bg-white rounded-2xl h-fit px-10 py-5 flex flex-col items-center">
                     <p className="font-bold text-2xl text-green-600 mb-5">
                         Administrator</p>
                     <p className="w-full font-medium text-lg text-green-500 mb-1 ml-2">
