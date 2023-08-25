@@ -15,7 +15,7 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-   const pathname = usePathname();
+   const pathname = window.location.href;
    return (
       <html lang='en'>
          <head>
@@ -27,7 +27,8 @@ export default function RootLayout({ children }) {
                <div className='h-[100%] overflow-y-auto bg-black/[.25]'>{children}</div>
                
             </div>
-            { pathname != '/admin' && <div className='h-[15vh] bg-green-700 md:pt-4'><CustomFooter/></div>}
+            { pathname === 'https://seinfarm.my.id/admin/' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname === 'https://seinfarm.my.id/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
          </body>
       </html>
    )

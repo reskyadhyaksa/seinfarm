@@ -4,11 +4,11 @@ import CustomFooter from "@/components/footer";
 import Admin1 from "./admin1";
 import Admin2 from "./admin2";
 import { usePathname } from "next/navigation";
-import TestAdmin from "./test";
 import { useEffect } from "react";
 
 export default function LoginPage() {
-    const pathname = usePathname();;
+    const pathname = window.location.href;
+
     useEffect(() =>{
         document.title = " SEINFARM - Admin"
     })
@@ -19,7 +19,7 @@ export default function LoginPage() {
                     Tabel dan Chart Admin Hanya Bisa Tampil Dalam Webview Laptop
                 </section>
 
-                <section className="hidden md:flex flex-col rounded-2xl h-fit w-full text-3xl bg-white px-10 py-5 text-green-600">
+                <section className="hidden md:flex flex-col rounded-2xl h-fit w-full text-3xl bg-white px-10 py-5 mt-5 text-green-600">
                     {/* <TestAdmin/> */}
                     
                     <Admin1/>
@@ -29,7 +29,9 @@ export default function LoginPage() {
                 </section>
             </main>
             <div className="grow"></div>
-            { pathname === '/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname === 'https://seinfarm.my.id/admin/' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname === 'https://seinfarm.my.id/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname === 'http://localhost:3000/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
         </div>
     )
 }

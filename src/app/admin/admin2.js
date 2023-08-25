@@ -3,15 +3,133 @@
 
 import { app, db } from "@/firebase/config";
 import { collection, doc, getDocs } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import PropTypes from 'prop-types';
+import { memo, useEffect, useRef, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { DateRangePicker } from "react-date-range";
+import { DateRange } from "react-date-range";
 import { CSVLink } from "react-csv";
+import { Box, Paper, Popper, Typography } from "@mui/material";
 
+function isOverflown(element) {
+    return (
+        element.scrollHeight > element.clientHeight ||
+        element.scrollWidth > element.clientWidth
+    );
+}
 
+const GridCellExpand = memo(function GridCellExpand(props) {
+    const { width, value } = props;
+    const wrapper = useRef(null);
+    const cellDiv = useRef(null);
+    const cellValue = useRef(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [showFullCell, setShowFullCell] = useState(false);
+    const [showPopper, setShowPopper] = useState(false);
 
+    const handleMouseEnter = () => {
+        const isCurrentlyOverflown = isOverflown(cellValue.current);
+        setShowPopper(isCurrentlyOverflown);
+        setAnchorEl(cellDiv.current);
+        setShowFullCell(true);
+    };
 
-export default function Admin2()  {
+    const handleMouseLeave = () => {
+        setShowFullCell(false);
+    };
+
+    useEffect(() => {
+        if (!showFullCell) {
+            return undefined;
+        }
+
+        function handleKeyDown(nativeEvent) {
+            // IE11, Edge (prior to using Bink?) use 'Esc'
+            if (nativeEvent.key === 'Escape' || nativeEvent.key === 'Esc') {
+            setShowFullCell(false);
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyDown);
+    
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [setShowFullCell, showFullCell]);
+
+    return (
+        <Box
+            ref={wrapper}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+            sx={{
+            alignItems: 'center',
+            lineHeight: '24px',
+            width: 1,
+            height: 1,
+            position: 'relative',
+            display: 'flex',
+            }}
+        >
+            <Box
+            ref={cellDiv}
+            sx={{
+                height: 1,
+                width,
+                display: 'block',
+                position: 'absolute',
+                top: 0,
+            }}
+            />
+            <Box
+            ref={cellValue}
+            sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+            {value}
+            </Box>
+            {showPopper && (
+            <Popper
+                open={showFullCell && anchorEl !== null}
+                anchorEl={anchorEl}
+                style={{ width, marginLeft: -17 }}
+            >
+                <Paper
+                elevation={1}
+                style={{ minHeight: wrapper.current.offsetHeight - 3 }}
+                >
+                <Typography variant="body2" style={{ padding: 8 }}>
+                    {value}
+                </Typography>
+                </Paper>
+            </Popper>
+            )}
+        </Box>
+    );
+});
+
+GridCellExpand.propTypes = {
+    value: PropTypes.string.isRequired,
+    width: PropTypes.number.isRequired,
+};
+
+function renderCellExpand(params) {
+    return (
+        <GridCellExpand value={params.value || ''} width={params.colDef.computedWidth} />
+    );
+}
+
+renderCellExpand.propTypes = {
+    /**
+     * The column of the row that the current cell belongs to.
+     */
+    colDef: PropTypes.object.isRequired,
+    /**
+     * The cell value, but if the column has valueGetter, use getValue.
+     */
+    value: PropTypes.string.isRequired,
+};
+
+export default function Admin2() {
+    var moment = require('moment');
     const [ data, setData ] = useState([]);
     const [ filterArray, setFilterArray ] = useState([]);
     const [ startDate, setStartDate ] = useState(new Date());
@@ -19,15 +137,17 @@ export default function Admin2()  {
     const [ openPick, setOpenPick ] = useState(true);
 
     const columns = [
-        { field: 'id', headerName: 'NO', width: 80, align: 'center', headerAlign: 'center',},
+        { field: 'id', headerName: 'NO', width: 80, align: 'center', headerAlign: 'center', editable: false, type: 'number', },
         { field: 'nama', headerName: 'NAMA/INSTANSI', width: 150, align: 'center', headerAlign: 'center',},
-        { field: 'tanggal', headerName: 'TANGGAL', width: 150, align: 'center', headerAlign: 'center',},
+        { field: 'temp_tanggal', headerName: 'TANGGAL', width: 150, align: 'center', headerAlign: 'center', 
+            valueFormatter: params => moment(params.value).format("DD/MM/YYYY")
+        },
         { field: 'time', headerName: 'WAKTU', width: 150, align: 'center', headerAlign: 'center',},
         { field: 'anak', headerName: 'ANAK', width: 100, align: 'center', headerAlign: 'center',},
         { field: 'dewasa', headerName: 'DEWASA', width: 100, align: 'center', headerAlign: 'center',},
         { field: 'testimoni', headerName: 'TESTIMONI', width: 150, align: 'center', headerAlign: 'center',},
-        { field: 'kritik', headerName: 'KRITIK', width: 150, align: 'center', headerAlign: 'center',},
-        { field: 'saran', headerName: 'SARAN', width: 225, align: 'center', headerAlign: 'center',},
+        { field: 'kritik', headerName: 'KRITIK', width: 150, align: 'center', headerAlign: 'center', renderCell: renderCellExpand},
+        { field: 'saran', headerName: 'SARAN', width: 225, align: 'center', headerAlign: 'center', renderCell: renderCellExpand},
     ];
 
     const csv_head = [
@@ -56,6 +176,10 @@ export default function Admin2()  {
 
     const getData = async () => {
         const temp_array = []
+        let tanggal = new Date()
+        let year = 0
+        let month = 0
+        let date = 0
         const colRef = collection(db, 'seinfarm');
         const snapshot = await getDocs(colRef);
         const docs = snapshot.docs.map((doc) => doc.data()).sort((a, b) => {
@@ -78,10 +202,18 @@ export default function Admin2()  {
         });
 
         docs.forEach((index, i) => {
+            const dateArray = index.tanggal.split('/');
+
+            date = dateArray[0];
+            month = dateArray[1] - 1;
+            year = dateArray[2];
+
+            tanggal = new Date(year, month, date)
             temp_array.push({
                 id: i+1,
                 nama: index.nama,
                 tanggal: index.tanggal,
+                temp_tanggal: tanggal,
                 time: index.time,
                 anak: index.anak,
                 dewasa: index.dewasa,
@@ -92,10 +224,14 @@ export default function Admin2()  {
         })
     
         console.log(docs);
-        setData(temp_array);
+        setData(temp_array)
+        setFilterArray(temp_array)
+        setStartDate(new Date())
+        setEndDate(new Date())
     }
 
     const handleSortAscendant = () => {
+        
         const temp_array = [];
         const item = [...data];
         const docs =  item.sort((a, b) => {
@@ -117,11 +253,21 @@ export default function Admin2()  {
             }
         });
 
+        
+
         docs.forEach((index, i) => {
+            const dateArray = index.tanggal.split('/');
+
+            date = dateArray[0];
+            month = dateArray[1] - 1;
+            year = dateArray[2];
+
+            tanggal = new Date(year, month, date)
             temp_array.push({
                 id: i+1,
                 nama: index.nama,
                 tanggal: index.tanggal,
+                temp_tanggal: tanggal,
                 time: index.time,
                 anak: index.anak,
                 dewasa: index.dewasa,
@@ -138,12 +284,12 @@ export default function Admin2()  {
     const convertDate = () => {
         handleSortAscendant()
         let temp_array = [];
-        let tanggal = new Date()
-        let year = 0
-        let month = 0
-        let date = 0
-
+        
         data.forEach((index, i) => {
+            let tanggal = new Date()
+            let year = 0
+            let month = 0
+            let date = 0
             const dateArray = index.tanggal.split('/');
 
             date = dateArray[0];
@@ -173,7 +319,7 @@ export default function Admin2()  {
     }
 
     const handleSelect = (date) => {
-        convertDate()
+        // convertDate()
         let filter = filterArray.filter((arr) => {
             let filterDate = new Date(arr['temp_tanggal'])
             return (
@@ -186,7 +332,7 @@ export default function Admin2()  {
         setEndDate(date.selection.endDate)
         setData(filter)
         if(date.selection.startDate != date.selection.endDate) {
-            setInterval(setOpenPick(!openPick), 3000)
+            setOpenPick(!openPick)
         }
         console.log('Start', date.selection.startDate)
         console.log('End', date.selection.endDate)
@@ -196,6 +342,7 @@ export default function Admin2()  {
         getData()
     }, [])
 
+    
 
     return(
         <div className="flex flex-col">
@@ -208,17 +355,23 @@ export default function Admin2()  {
                 <div className="grow"></div>
                 <button className="text-base bg-green-600 text-white border-2 rounded-lg py-1 px-6" onClick={() => {setOpenPick(!openPick)}}>Search by Date</button>
                 <div className={`${ openPick ? 'hidden' : 'absolute'} z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2`}>
-                    <DateRangePicker ranges={[selectionRange]} onChange={handleSelect} rangeColors={['#26833A', '#26833A', '#26833A']} />
+                    <DateRange editableDateInputs={true} ranges={[selectionRange]} onChange={handleSelect} moveRangeOnFirstSelection={false}/>
                 </div>
             </div>
             { data.length == 0 ? 
-                <div className="flex justify-center mt-20">
-                    <div className="self-center">Data Loading</div>
+                <div className="flex justify-center">
+                    <div className="self-center text-green-600">Data Loading</div>
                     <img src={'/loading.png'} alt="" height={0} width={0} sizes="25px" className="w-12 h-12 animate-spin ml-4"/>
                 </div> : 
                 
-                <div className="h-auto">
-                    <DataGrid sx={{"& .MuiDataGrid-columnHeaders": {backgroundColor: "rgb(22 163 74)", color: "rgb(255 255 255)", fontSize: 16 }}} 
+                <div className="h-auto ">
+                    <DataGrid sx={{
+                            "& .MuiDataGrid-columnHeaders": {backgroundColor: "rgb(22 163 74)", 
+                            color: "rgb(255 255 255)", fontSize: 16 }, 
+                            "& .MuiDataGrid-columnHeaderTitle": { whiteSpace: "normal", lineHeight: "normal" },
+                            "& .MuiDataGrid-columnHeader": { height: "unset !important" },
+                            "& .MuiDataGrid-columnHeaders": { maxHeight: "168px !important" }
+                        }} 
                         rows={data} columns={columns} initialState={{
                         pagination: {
                             paginationModel: { page: 0, pageSize: 10 },
