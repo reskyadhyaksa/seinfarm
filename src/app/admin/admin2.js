@@ -223,7 +223,6 @@ export default function Admin2() {
             })
         })
     
-        console.log(docs);
         setData(temp_array)
         setFilterArray(temp_array)
         setStartDate(new Date())
@@ -277,7 +276,6 @@ export default function Admin2() {
             })
         })
     
-        console.log(temp_array);
         setData(docs);
     };
 
@@ -311,7 +309,6 @@ export default function Admin2() {
             })
         })
 
-        console.log(temp_array)
         setData(temp_array)
         setFilterArray(temp_array)
         setStartDate(new Date())
@@ -334,8 +331,6 @@ export default function Admin2() {
         if(date.selection.startDate != date.selection.endDate) {
             setOpenPick(!openPick)
         }
-        console.log('Start', date.selection.startDate)
-        console.log('End', date.selection.endDate)
     }
 
     useEffect(() =>{

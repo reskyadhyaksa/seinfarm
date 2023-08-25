@@ -91,7 +91,6 @@ export default function Admin1() {
                 total: total,
             })
         }
-        console.log(newArray)
         
         setDataChart(newArray);
     }

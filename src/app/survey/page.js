@@ -6,7 +6,6 @@ import { app, db } from "@/firebase/config";
 import { collection, addDoc } from "firebase/firestore";
 import { getCurrentDate } from "@/components/getDate";
 import { useRouter } from "next/navigation";
-import Head from "next/head";
 
 
 

@@ -15,20 +15,18 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-   const pathname = window.location.href;
+   const pathname = usePathname();
    return (
       <html lang='en'>
          <head>
             <link rel='icon' href='/logo2.png' sizes='any'/>
          </head>
          <body className={poppins.className}>
-            <div className={`background flex flex-col ${ pathname == '/admin' ? 'h-[100vh]' : 'h-[85vh]'}`}>
+            <div className={`background flex flex-col ${ pathname == '/admin/' ? 'h-[100vh]' : 'h-[85vh]'}`}>
                <CustomNavigation/>
                <div className='h-[100%] overflow-y-auto bg-black/[.25]'>{children}</div>
-               
             </div>
-            { pathname === 'https://seinfarm.my.id/admin/' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
-            { pathname === 'https://seinfarm.my.id/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname != '/admin/' && <div className='h-[15vh] bg-green-700 md:pt-4'><CustomFooter/></div>}
          </body>
       </html>
    )

@@ -7,8 +7,8 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export default function LoginPage() {
-    const pathname = window.location.href;
-
+    const pathname = usePathname();
+    
     useEffect(() =>{
         document.title = " SEINFARM - Admin"
     })
@@ -29,9 +29,7 @@ export default function LoginPage() {
                 </section>
             </main>
             <div className="grow"></div>
-            { pathname === 'https://seinfarm.my.id/admin/' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
-            { pathname === 'https://seinfarm.my.id/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
-            { pathname === 'http://localhost:3000/admin' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
+            { pathname === '/admin/' && <div className="bg-green-600 h-fit"><CustomFooter/></div>}
         </div>
     )
 }
